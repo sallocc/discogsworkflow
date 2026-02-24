@@ -18,21 +18,21 @@ generate_suggestions_task:
     10 song suggestions that the user might enjoy. Base your recommendations on 
     patterns in artists, genres, styles, and years found in the collection. Include 
     both well-known tracks and hidden gems. Each suggestion must include both the 
-    artist name and song title. Ensure diversity across genres and artists - don't 
+    artist name, song title and album title. Ensure diversity across genres and artists - don't 
     recommend too many songs from the same artist or genre.
   expected_output: >
     A structured list of exactly 10 song suggestions, each formatted as 
-    "Artist - Song Title". Ensure each entry has both artist and song title 
+    "Artist - Song Title - Album Title". Ensure each entry has both artist, song, and album title 
     clearly separated. The list should be diverse and reflect the user's musical 
     preferences based on their collection.
   agent: song_recommender
 
 search_and_filter_releases_task:
   description: >
-    For each of the 10 suggested songs from the previous task, search the Discogs 
-    database to find available releases. Use the search_by_title MCP tool for each 
-    song. Look for exact or very close matches to the song title. For each match 
-    found, verify it matches the expected artist. Discard any suggestions that don't 
+    For each of the 10 suggested songs from the previous task (formatted as "Artist - Song Title - Album Title"), search the Discogs 
+    database to find available releases. Use the search_by_artist_and_title MCP tool for each 
+    song. Look for exact or very close matches to the song title and artist. If there is no match 
+    for the song title, search Discogs using the album title as the song title. Discard any suggestions that don't 
     have releases available on Discogs or where no good match is found. For songs 
     with multiple releases, select the most recent release (highest year). Return a 
     filtered list with release IDs and include all metadata from the search results, 
