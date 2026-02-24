@@ -18,7 +18,8 @@ generate_suggestions_task:
     10 song suggestions that the user might enjoy. Base your recommendations on 
     patterns in artists, genres, styles, and years found in the collection. Include 
     both well-known tracks and hidden gems. Each suggestion must include both the 
-    artist name, song title and album title. Ensure diversity across genres and artists - don't 
+    artist name, song title and album title. If the song title has any features (formatted like 'feat. [Artist]')
+    please do not include that in the song title Ensure diversity across genres and artists - don't 
     recommend too many songs from the same artist or genre.
   expected_output: >
     A structured list of exactly 10 song suggestions, each formatted as 
@@ -31,15 +32,18 @@ search_and_filter_releases_task:
   description: >
     For each of the 10 suggested songs from the previous task (formatted as "Artist - Song Title - Album Title"), search the Discogs 
     database to find available releases. Use the search_by_artist_and_title MCP tool for each 
-    song. Look for exact or very close matches to the song title and artist. If there is no match 
-    for the song title, search Discogs using the album title as the song title. Discard any suggestions that don't 
+    song. The MCP tool will either return no matches or a list of releases that are a close match - you
+    should only choose one release from this list to be added to the user's collection later on. 
+    Look for exact or very close matches to the song title and artist. If there is no match 
+    for the song title, search Discogs by replacing the song title with the album title and the artist name still
+    included in the search_by_artist_and_title MCP tool. Discard any suggestions that don't 
     have releases available on Discogs or where no good match is found. For songs 
     with multiple releases, select the most recent release (highest year). Return a 
     filtered list with release IDs and include all metadata from the search results, 
     especially the community wants count, haves count, year, format, and any other 
     popularity indicators available.
   expected_output: >
-    Filtered list of available releases with the following details for each: 
+    Filtered list of one available release for each song with the following details for each: 
     release ID, artist, title, year, format, community wants count, community haves 
     count, and any other relevant metadata. Only include songs that have confirmed 
     matches in the Discogs database. Include the total count of successfully matched 
@@ -53,7 +57,8 @@ create_suggested_folder_task:
     The username is {username}. Use the create_collection_folder MCP tool to create 
     the folder first. Then, add all the release IDs from the filtered list in the 
     previous task to this newly created folder using the add_release_to_collection 
-    MCP tool. Add each release one at a time to the folder ID returned from the 
+    MCP tool with the folder_id parameter passed in. Add each release one at a time 
+    to the folder ID returned from the 
     folder creation. Handle any errors gracefully if a release cannot be added.
   expected_output: >
     Confirmation message including the folder ID, the complete folder name 
@@ -83,7 +88,7 @@ create_popular_folder_task:
     Create a new folder in the user's Discogs collection with the name 
     "CrewPopular_[timestamp]" where epoch_time is the current Unix timestamp. 
     The username is {username}. Use the create_collection_folder MCP tool to create 
-    the folder first. Then, add the top 10 popular release IDs from the previous 
+    the folder first. Then, add the top 3 popular release IDs from the previous 
     task to this newly created folder using the add_release_to_collection MCP tool, 
     specifying the folder ID returned from the folder creation. Add each release 
     one at a time in order of popularity (most popular first).

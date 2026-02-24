@@ -26,10 +26,10 @@ def run():
         print(f"\nUsername: {inputs['username']}")
         print("\nThis workflow will:")
         print("  1. Analyze your Discogs collection")
-        print("  2. Generate 50 personalized song suggestions")
+        print("  2. Generate 10 personalized song suggestions")
         print("  3. Search for available releases on Discogs")
         print("  4. Create a 'CrewSuggested' folder with all matches")
-        print("  5. Identify the top 10 most popular releases")
+        print("  5. Identify the top 3 most popular releases")
         print("  6. Create a 'CrewPopular' folder with the top picks")
         print("\n" + "="*60 + "\n")
         
