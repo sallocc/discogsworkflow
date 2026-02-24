@@ -1,0 +1,95 @@
+get_collection_task:
+  description: >
+    Retrieve all releases from the user's Discogs collection using the 
+    get_collection_releases MCP tool. The username is {username}. Fetch multiple 
+    pages if necessary to ensure complete data collection. Each page can contain 
+    up to 100 items, so check the pagination information and retrieve all pages 
+    until you have the complete collection.
+  expected_output: >
+    Complete list of all releases in the user's collection with details including 
+    artist, title, genre, style, year, format, release ID, and date added. Format 
+    the output as a structured list that can be easily analyzed. Include the total 
+    number of releases found.
+  agent: discogs_api_agent
+
+generate_suggestions_task:
+  description: >
+    Analyze the user's collection data from the previous task and generate exactly 
+    10 song suggestions that the user might enjoy. Base your recommendations on 
+    patterns in artists, genres, styles, and years found in the collection. Include 
+    both well-known tracks and hidden gems. Each suggestion must include both the 
+    artist name and song title. Ensure diversity across genres and artists - don't 
+    recommend too many songs from the same artist or genre.
+  expected_output: >
+    A structured list of exactly 10 song suggestions, each formatted as 
+    "Artist - Song Title". Ensure each entry has both artist and song title 
+    clearly separated. The list should be diverse and reflect the user's musical 
+    preferences based on their collection.
+  agent: song_recommender
+
+search_and_filter_releases_task:
+  description: >
+    For each of the 10 suggested songs from the previous task, search the Discogs 
+    database to find available releases. Use the search_by_title MCP tool for each 
+    song. Look for exact or very close matches to the song title. For each match 
+    found, verify it matches the expected artist. Discard any suggestions that don't 
+    have releases available on Discogs or where no good match is found. For songs 
+    with multiple releases, select the most recent release (highest year). Return a 
+    filtered list with release IDs and include all metadata from the search results, 
+    especially the community wants count, haves count, year, format, and any other 
+    popularity indicators available.
+  expected_output: >
+    Filtered list of available releases with the following details for each: 
+    release ID, artist, title, year, format, community wants count, community haves 
+    count, and any other relevant metadata. Only include songs that have confirmed 
+    matches in the Discogs database. Include the total count of successfully matched 
+    releases.
+  agent: discogs_api_agent
+
+create_suggested_folder_task:
+  description: >
+    Create a new folder in the user's Discogs collection with the name 
+    "CrewSuggested_[timestamp]" where epoch_time is the current Unix timestamp. 
+    The username is {username}. Use the create_collection_folder MCP tool to create 
+    the folder first. Then, add all the release IDs from the filtered list in the 
+    previous task to this newly created folder using the add_release_to_collection 
+    MCP tool. Add each release one at a time to the folder ID returned from the 
+    folder creation. Handle any errors gracefully if a release cannot be added.
+  expected_output: >
+    Confirmation message including the folder ID, the complete folder name 
+    (CrewSuggested_[timestamp]), and the count of releases successfully added to 
+    the folder. List any releases that failed to be added if applicable.
+  agent: discogs_api_agent
+
+select_top_popular_task:
+  description: >
+    Analyze the filtered releases list from the search_and_filter_releases_task. 
+    For each release, examine the community wants count and haves count. Calculate 
+    a popularity score by comparing these metrics. Releases with higher wants counts 
+    relative to haves counts are more popular/desirable. Consider both the absolute 
+    numbers (total wants + haves indicating community engagement) and the ratio 
+    (wants/haves indicating demand). Rank all releases by popularity and select the 
+    top 3 most popular releases. Provide clear reasoning for your rankings including 
+    the specific wants and haves numbers for each selected release.
+  expected_output: >
+    List of the top 3 most popular releases ranked in order, with each entry 
+    including: release ID, artist, title, wants count, haves count, calculated 
+    popularity score, and brief reasoning for the ranking. Include a summary 
+    explaining the methodology used for popularity assessment.
+  agent: popularity_picker
+
+create_popular_folder_task:
+  description: >
+    Create a new folder in the user's Discogs collection with the name 
+    "CrewPopular_[timestamp]" where epoch_time is the current Unix timestamp. 
+    The username is {username}. Use the create_collection_folder MCP tool to create 
+    the folder first. Then, add the top 10 popular release IDs from the previous 
+    task to this newly created folder using the add_release_to_collection MCP tool, 
+    specifying the folder ID returned from the folder creation. Add each release 
+    one at a time in order of popularity (most popular first).
+  expected_output: >
+    Confirmation message including the folder ID, the complete folder name 
+    (CrewPopular_[timestamp]), and confirmation that all 10 popular releases were 
+    successfully added to the folder. Include the final list of releases in the 
+    folder with their popularity rankings.
+  agent: discogs_api_agent
